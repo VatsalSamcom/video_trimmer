@@ -3,14 +3,14 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'package:flutter_native_video_trimmer/flutter_native_video_trimmer.dart';
-import 'package:get_thumbnail_video/index.dart';
-import 'package:get_thumbnail_video/video_thumbnail.dart';
+
 import 'package:path/path.dart';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:video_trimmer/src/utils/storage_dir.dart';
 
 enum OutputType { video, gif }
@@ -39,7 +39,6 @@ class Trimmer {
   Stream<TrimmerEvent> get eventStream => _controller.stream;
 
   /// Loads a video using the path provided.
-  ///
   /// Returns the loaded video file.
   Future<void> loadVideo({required File videoFile}) async {
     currentVideoFile = videoFile;
@@ -100,7 +99,7 @@ class Trimmer {
   /// - [scaleGIF] is the maximum width for the thumbnails.
   /// - [qualityGIF] is the quality for the thumbnails.
   ///
-  Future<List<Uint8List>> _generateGifImageBytes({
+  Future<List<Uint8List?>> _generateGifImageBytes({
     required String videoPath,
     required int fpsGIF,
     required int scaleGIF,
@@ -115,7 +114,7 @@ class Trimmer {
     final frameIntervalMs =
         (1000 / fpsGIF).round(); // Time between frames (in ms)
 
-    List<Uint8List> thumbnails = [];
+    List<Uint8List?> thumbnails = [];
 
     // Only generate thumbnails between start and end positions
     for (int timeMs = startValue.toInt();
@@ -169,9 +168,11 @@ class Trimmer {
     final gifFrames = <img.Image>[];
 
     for (final frameBytes in frames) {
-      final decodedImage = img.decodeImage(frameBytes);
-      if (decodedImage != null) {
-        gifFrames.add(decodedImage);
+      if(frameBytes!=null) {
+        final decodedImage = img.decodeImage(frameBytes);
+        if (decodedImage != null) {
+          gifFrames.add(decodedImage);
+        }
       }
     }
 
